@@ -1,4 +1,4 @@
 A little typing game
 ===========================
 
-Have a look at http://tonyjeffre.com/wordgame/ to play.
+Have a look at http://tonyjeffree.com/wordgame/ to play.
