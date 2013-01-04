@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Word Game</title>
+<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600,700' rel='stylesheet' type='text/css'>
+<link href="style.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript">
+var _gaq=_gaq||[];_gaq.push(["_setAccount","UA-536128-11"]);_gaq.push(["_trackPageview"]);(function(){var a=document.createElement("script");a.type="text/javascript";a.async=!0;a.src=("https:"==document.location.protocol?"https://ssl":"http://www")+".google-analytics.com/ga.js";var b=document.getElementsByTagName("script")[0];b.parentNode.insertBefore(a,b)})();
+</script>
+</head>
+<body>
+
+<!--p id="game-description">Word Game - Select a Game Type and type as fast as you can. The screen will change colour when you mess up, you can just hit ESC to clear the input box when you get in a mess.</p-->
+
+<div id="finish-dialog">
+	<h2>Game Over!</h2>
+    <p id="f-score">Score: 100</p>
+    <p id="f-time">90 sec</p>
+    <p id="f-wpm">60 WPM</p>
+    <p id="f-errors"></p>
+    <p><input type="button" id="finish-button" value="Play again" /></p>
+</div>
+
+<div id="typebox-wrapper">
+    <div id="output"></div>
+    <div id="options-wrapper">Game type: 
+        <label><input type="radio" name="gametype" data-type="timed" checked="checked" /> 1 minute</label>
+        <label><input type="radio" name="gametype" data-type="words" /> 100 words</label>
+        <label><input type="radio" name="gametype" data-type="nonstop" /> non-stop</label>
+    </div>
+	<input type="text" id="typebox" placeholder="Start typing!" autocorrect="off" autocapitalize="off" /> 
+	<input type="button" id="reset" value="Start over" />
+</div>
+
+<div id="infobox">
+	<h1 id="score">0</h1>
+	<p id="level">Lvl 1</p>
+    <p id="wpm"></p>
+</div>
+
+<ul id="worddisplay"></ul>
+
+<div id="wordnik">Words supplied by <a href="http://www.wordnik.com/"><img src="wordnik.png" alt="Wordnik" /></a></div>
+
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/jquery-ui.js"></script>
+<script type="text/javascript" src="wordgame.min.js"></script>
+
+</body>
+</html>
