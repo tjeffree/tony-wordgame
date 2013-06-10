@@ -5,17 +5,17 @@ function wordGame(){}
     var 
         $win        = $(window),
         $doc        = $(document),
-        $body		= $('body'),
+        $body       = $('body'),
 
-        PADDING 	= 20,           // padding for the bottom and right of the screen
-        REFRESH		= 5 * 1000,	// refresh interval to get new words
+        PADDING     = 20,           // padding for the bottom and right of the screen
+        REFRESH     = 5 * 1000, // refresh interval to get new words
 
         TIME_LIMIT  = 60,           // Time limit for time limited game
         WORD_LIMIT  = 100,          // Word limit for word limited game
 
         // background colours for the words
-        colList 	= ["#ECD078","#D95B43","#C02942","#542437","#53777A","#003366","#FFCC00","#53004B","#77BED2","#F2583E"],
-        colX		= 0,
+        colList     = ["#ECD078","#D95B43","#C02942","#542437","#53777A","#003366","#FFCC00","#53004B","#77BED2","#F2583E"],
+        colX        = 0,
 
         // Various DOM objects
         $typebox,
@@ -25,64 +25,64 @@ function wordGame(){}
         $wpm,
         $finish,
 
-        getTO		= null,      // Timeout pointer for the word fetching
+        getTO       = null,      // Timeout pointer for the word fetching
         timeTO      = null,      // Timeout pointer for the time limited game
 
-        limit 		= 10,		 // Number of words to fetch
-        count 		= 0,		 // Count of words being displayed at any one time
-        running		= false,	 // Status of the word fetching
-        wordlist	= {},	     // Object containing all words being displayed
+        limit       = 10,        // Number of words to fetch
+        count       = 0,         // Count of words being displayed at any one time
+        running     = false,     // Status of the word fetching
+        wordlist    = {},        // Object containing all words being displayed
 
         // wordnik API key
-        api_key		= 'b9342023bee8ce1e6060402034d0b36c7ab0ec75ceb051e4a',
+        api_key     = 'b9342023bee8ce1e6060402034d0b36c7ab0ec75ceb051e4a',
 
         // wordnik options
-    	APIoptions 	= {
-    		api_key 			: api_key,
-    		hasDictionaryDef 	: true,
-    		minLength 			: 3,
-    		maxLength			: 7,
+        APIoptions  = {
+            api_key             : api_key,
+            hasDictionaryDef    : true,
+            minLength           : 3,
+            maxLength           : 7,
             minCorpusCount      : 100,
             minDictionaryCount  : 2
-    	},
+        },
 
-    	// Player's current level
-    	currentLevel	= 0,
+        // Player's current level
+        currentLevel    = 0,
 
-    	// Description of each level
-    	levels			= [
-    		{ score: 10, 	minLength : 3, 	maxLength : 4,  timeout : 30    },
-    		{ score: 25, 	minLength : 4, 	maxLength : 5,  timeout : 30 	},
-    		{ score: 50, 	minLength : 4, 	maxLength : 6,  timeout : 40 	},
-    		{ score: 80, 	minLength : 5, 	maxLength : 7,  timeout : 40 	},
+        // Description of each level
+        levels          = [
+            { score: 10,    minLength : 3,  maxLength : 4,  timeout : 30    },
+            { score: 25,    minLength : 4,  maxLength : 5,  timeout : 30    },
+            { score: 50,    minLength : 4,  maxLength : 6,  timeout : 40    },
+            { score: 80,    minLength : 5,  maxLength : 7,  timeout : 40    },
             { score: 120,   minLength : 5,  maxLength : 9,  timeout : 60    },
             { score: 150,   minLength : 5,  maxLength : 10, timeout : 60    },
             { score: 200,   minLength : 5,  maxLength : 12, timeout : 80    },
             { score: 300,   minLength : 5,  maxLength : 14, timeout : 80    },
-    		{ score: null, 	minLength : 10, maxLength : 15, timeout : 90 	}
-    	],
+            { score: null,  minLength : 10, maxLength : 15, timeout : 90    }
+        ],
 
-        score			= 0,	     // Current score
-        characters		= 0,	     // Current character count
-        errors			= 0, 	     // Count of errors
+        score           = 0,         // Current score
+        characters      = 0,         // Current character count
+        errors          = 0,         // Count of errors
         inerror         = false,     // Keep track of whether we are in a state of error
 
         // Track start and end timestamps
-        startTime		= null,
-        endTime			= null,
+        startTime       = null,
+        endTime         = null,
 
         // Game type - word/time limited, non-stop
-        gametype		= null;
+        gametype        = null;
 
         // Public
         this.init = function() {
 
             // Fetch common DOM objects
-            $words 		= $('#worddisplay');
-            $typebox	= $('#typebox').focus();
-        	$score 		= $('#score');
-            $level 		= $('#level');
-            $wpm 		= $('#wpm');
+            $words      = $('#worddisplay');
+            $typebox    = $('#typebox').focus();
+            $score      = $('#score');
+            $level      = $('#level');
+            $wpm        = $('#wpm');
             $finish     = $('#finish-dialog');
 
             setEvents();
@@ -95,33 +95,33 @@ function wordGame(){}
 
             doCol('#333', '#000');
 
-        	currentLevel= 0;
-        	score 		= 0;
-        	characters 	= 0;
-        	errors		= 0;
-        	startTime	= null;
+            currentLevel= 0;
+            score       = 0;
+            characters  = 0;
+            errors      = 0;
+            startTime   = null;
             endTime     = null;
-        	gametype	= null;
+            gametype    = null;
 //          running     = false;
 
-        	$typebox.val('').removeAttr('disabled').focus();
+            $typebox.val('').removeAttr('disabled').focus();
             $('#options-wrapper input').removeAttr('disabled','disabled');
-        	$score.html('0');
-        	$level.html('Lvl 1');
-        	$wpm.html('');
+            $score.html('0');
+            $level.html('Lvl 1');
+            $wpm.html('');
             $finish.hide();
             $words.removeClass('finish');
             $typebox.attr('placeholder','Start typing!');
 
-        	getWords();
+            getWords();
         }
 
         function finish() {
-        	$typebox.attr('disabled','disabled');
+            $typebox.attr('disabled','disabled');
 //          count = 0;
-//        	$words.empty();
+//          $words.empty();
 //          wordlist = {};
-//        	clearTimeout(getTO);
+//          clearTimeout(getTO);
 
             var winHeight   = $doc.height(),
                 winWidth    = $doc.width(),
@@ -147,11 +147,11 @@ function wordGame(){}
         }
 
         function getGameType() {
-        	gametype = $('#options-wrapper input:checked').data('type');
+            gametype = $('#options-wrapper input:checked').data('type');
 
-        	if (gametype=='timed') {
-        		timeTO = setTimeout(function() {checkTimed();}, 10000);
-        	}
+            if (gametype=='timed') {
+                timeTO = setTimeout(function() {checkTimed();}, 10000);
+            }
 
             $('#options-wrapper input').attr('disabled','disabled');
         }
@@ -161,13 +161,13 @@ function wordGame(){}
 
             clearTimeout(timeTO);
 
-        	var ts 		= new Date().getTime() / 1000,
+            var ts      = new Date().getTime() / 1000,
                 refresh = 5000,
-        		diff 	= ts - startTime;
+                diff    = ts - startTime;
                 
-        	if (diff >= TIME_LIMIT) {
-        		finish();
-        	} else {
+            if (diff >= TIME_LIMIT) {
+                finish();
+            } else {
                 if (diff >= TIME_LIMIT - 10000) {
                     refresh = 500;
                 }
@@ -183,85 +183,85 @@ function wordGame(){}
 
         function setEvents() {
 
-        	$typebox.keyup(function(e) {
+            $typebox.keyup(function(e) {
 
-        		if (e.keyCode == 27 || e.keyCode == 13) {	// 27 = esc , 13 = enter
-        			$typebox.val('');
-        			return;
-        		}
+                if (e.keyCode == 27 || e.keyCode == 13) {   // 27 = esc , 13 = enter
+                    $typebox.val('');
+                    return;
+                }
 
                 if (e.keyCode == 32) {  // 32 = spacebar
                     $typebox.val(this.value.substring(0, this.value.length-1));
                     return;
                 }
 
-        		if (this.value.length==0) {
-	        		doCol('#333', '#000');
-        			return;
-        		}
+                if (this.value.length==0) {
+                    doCol('#333', '#000');
+                    return;
+                }
 
-        		var str = this.value,
-        			ts 	= new Date().getTime() / 1000,
-        			wordMatches, wordPartFound = false, 
-        			timedOut, removedTimedOut = false,
+                var str = this.value,
+                    ts  = new Date().getTime() / 1000,
+                    wordMatches, wordPartFound = false, 
+                    timedOut, removedTimedOut = false,
                     firstrun = false;
 
-        		if (startTime===null) {
-        			startTime = ts;
+                if (startTime===null) {
+                    startTime = ts;
                     firstrun = true;
-        			getGameType();
-        		}
+                    getGameType();
+                }
 
-        		characters++;
+                characters++;
 
-        		for (x in wordlist) {
+                for (x in wordlist) {
 
                     // On the first run, reset the timestamps so words don't all vanish if it was left a while before starting
                     if (firstrun) {
                         wordlist[x].ts = ts;
                     }
 
-        			// word matches
-        			wordMatches 	= wordlist[x].word.substring(0, str.length)==str,
+                    // word matches
+                    wordMatches     = wordlist[x].word.substring(0, str.length)==str,
 
-        			// length matches
-        			lengthMatches 	= wordlist[x].word.length == str.length;
+                    // length matches
+                    lengthMatches   = wordlist[x].word.length == str.length;
 
-        			// word is past the timeout and is not currently being typed - get rid
-        			timedOut		= !removedTimedOut && !wordMatches && (ts - wordlist[x].ts) > levels[currentLevel].timeout;
+                    // word is past the timeout and is not currently being typed - get rid
+                    timedOut        = !removedTimedOut && !wordMatches && (ts - wordlist[x].ts) > levels[currentLevel].timeout;
 
-        			if ((wordMatches&&lengthMatches) || timedOut) {
+                    if ((wordMatches&&lengthMatches) || timedOut) {
 
-        				// make sure we note this is found so we don't change the text colour
-        				wordPartFound = true;
+                        // make sure we note this is found so we don't change the text colour
+                        wordPartFound = true;
 
-						removeWord($('#w'+wordlist[x].id), x);
+                        removeWord($('#w'+wordlist[x].id), x);
 
-        				if (!timedOut) {
-	        				// empty the typing box
-	        				doCol('#333', '#000');
-	        				$typebox.val('');
-	        				incScore();
-        				} else {
-        					// remove just 1 word at a time of the timed-out variety
-							removedTimedOut = true;
-        				}
-        			} else if (wordPartFound===false) {
-        				if (wordMatches) {
-        					// Is matching a word
-	        				doCol('#2d2b4e', '#190eb5');
+                        if (!timedOut) {
+                            // empty the typing box
+                            doCol('#333', '#000');
+                            $typebox.val('');
+                            incScore();
+                        } else {
+                            // remove just 1 word at a time of the timed-out variety
+                            removedTimedOut = true;
+                        }
+                    } else if (wordPartFound===false) {
+                        if (wordMatches) {
+                            // Is matching a word
+                            doCol('#2d2b4e', '#190eb5');
 
-	        				// Mark the part found for this keystroke
-	        				wordPartFound = true;
+                            // Mark the part found for this keystroke
+                            wordPartFound = true;
 
                             // Reset the timestamp on this word to stop it disappearing on a typo
                             wordlist[x].ts = ts;
 
-	        				// Push this word to the top to stop it getting hit by new words
-	        				$('#w'+wordlist[x].id).css({zIndex: 2});
-	        			}
-        			}
-        		}
+                            // Push this word to the top to stop it getting hit by new words
+                            $('#w'+wordlist[x].id).css({zIndex: 2});
+                        }
+                    }
+                }
 
                 if (wordPartFound===false) {
                     if (!inerror) {
@@ -273,29 +273,29 @@ function wordGame(){}
                     inerror = false;
                 }
 
-        		if (count < 5) {
-        			getWords();
-        		}
+                if (count < 5) {
+                    getWords();
+                }
 
-        	});
+            });
 
-			$words.on('click', 'li', function() {
+            $words.on('click', 'li', function() {
 
                 var obj = $(this);
-				removeWord(obj, obj.data('id'));
+                removeWord(obj, obj.data('id'));
 
                 $typebox.focus();
 
-				// check how many we have left
-				if (count < 5) {
-        			getWords();
-        		}
+                // check how many we have left
+                if (count < 5) {
+                    getWords();
+                }
 
-			});
+            });
 
-			$('#reset, #finish-button').click(function() {
-				reset();
-			})
+            $('#reset, #finish-button').click(function() {
+                reset();
+            })
 
             $('#wordnik a').click(function() {
                 window.open(this.href);
@@ -309,122 +309,122 @@ function wordGame(){}
 
         function removeWord(obj, id) {
 
-        	// remove this word
-			obj.fadeOut(300).queue(function(){$(this).remove();});
+            // remove this word
+            obj.fadeOut(300).queue(function(){$(this).remove();});
 
-			// decrement the count
-			count--;
+            // decrement the count
+            count--;
 
-			// remove the word from the list
-			delete wordlist[id];
+            // remove the word from the list
+            delete wordlist[id];
         }
 
         function doCol(bg, txt) {
-			$body.css({backgroundColor: bg});
-			$typebox.css({color: txt});
+            $body.css({backgroundColor: bg});
+            $typebox.css({color: txt});
         }
 
         function incScore() {
 
-        	// increment the score and update the display
-        	score++;
-        	$score.html(score).animate({color: '#fff047'}, 300).delay(100).animate({color: '#f1f1f1'}, 300);
+            // increment the score and update the display
+            score++;
+            $score.html(score).animate({color: '#fff047'}, 300).delay(100).animate({color: '#f1f1f1'}, 300);
 
-        	// On the first point, remove the placeholder text from the typing box
-        	if (score==1) {
-        		$typebox.removeAttr('placeholder');
-        	}
+            // On the first point, remove the placeholder text from the typing box
+            if (score==1) {
+                $typebox.removeAttr('placeholder');
+            }
 
-        	// Check if we have gone up a level
-        	if (levels[currentLevel].score!=null && score >= levels[currentLevel].score) {
-        		currentLevel++;
-        		$level.html('Lvl ' + (currentLevel+1));
-        	}
+            // Check if we have gone up a level
+            if (levels[currentLevel].score!=null && score >= levels[currentLevel].score) {
+                currentLevel++;
+                $level.html('Lvl ' + (currentLevel+1));
+            }
 
-        	updateWPM();
+            updateWPM();
 
-        	checkScore();
+            checkScore();
         }
 
         function updateWPM() {
-        	
-        	var ts 		= new Date().getTime() / 1000,
-        		diff 	= ts - startTime,
-        		mins	= diff / 60;
+            
+            var ts      = new Date().getTime() / 1000,
+                diff    = ts - startTime,
+                mins    = diff / 60;
 
-        	$wpm.html(Math.round(score / mins) + ' WPM');
+            $wpm.html(Math.round(score / mins) + ' WPM');
         }
 
         function setWordTO() {
-        	getTO = setTimeout(function(){getWords();}, REFRESH);
+            getTO = setTimeout(function(){getWords();}, REFRESH);
         }
 
         function getWords() {
 
-        	if (running===true) {
+            if (running===true) {
                 setWordTO();
                 return;
             }
 
             clearTimeout(getTO);
 
-        	running = true;
+            running = true;
 
-        	if (count==limit) {
+            if (count==limit) {
                 running = false;
-        		setWordTO();
-        		return;
-        	}
+                setWordTO();
+                return;
+            }
 
-        	APIoptions.limit 		= limit - count + 5;        // Add on some extra so we complete the set quicker
-        	APIoptions.minLength	= levels[currentLevel].minLength;
-        	APIoptions.maxLength	= levels[currentLevel].maxLength;
+            APIoptions.limit        = limit - count + 5;        // Add on some extra so we complete the set quicker
+            APIoptions.minLength    = levels[currentLevel].minLength;
+            APIoptions.maxLength    = levels[currentLevel].maxLength;
 
-        	$.ajax(
-        		'http://api.wordnik.com/v4/words.json/randomWords',
-        		{
-        			data: APIoptions,
+            $.ajax(
+                'http://api.wordnik.com/v4/words.json/randomWords',
+                {
+                    data: APIoptions,
                     dataType: 'jsonp'
-        		}
-        	).done(function(data) {
+                }
+            ).done(function(data) {
 
-        		var winHeight 	= $doc.height(),
-        			winWidth	= $doc.width(),
-        			ts 			= new Date().getTime() / 1000,
-        			html;
+                var winHeight   = $doc.height(),
+                    winWidth    = $doc.width(),
+                    ts          = new Date().getTime() / 1000,
+                    html;
 
                 for (var x=0; x<data.length; x++) {
 
                     if (count>=10) break;
 
-        			// increment the current word count
-        			count++;
+                    // increment the current word count
+                    count++;
 
-        			// add the word to the list
-        			wordlist[data[x].id] = {
-        				id: data[x].id,
-        				word: data[x].word.toLowerCase(),
-        				ts: ts
-        			};
+                    // add the word to the list
+                    wordlist[data[x].id] = {
+                        id: data[x].id,
+                        word: data[x].word.toLowerCase(),
+                        ts: ts
+                    };
 
-        			html = $('<li id="w' + data[x].id + '" data-id="' + data[x].id + '" style="display:none;">' + wordlist[data[x].id].word + '</li>');
+                    html = $('<li id="w' + data[x].id + '" data-id="' + data[x].id + '" style="display:none;">' + wordlist[data[x].id].word + '</li>');
 
-        			html.appendTo($words);
+                    html.appendTo($words);
 
-        			html.css({
-        				backgroundColor: colList[colX],
-        				left: Math.floor(Math.random() * (winWidth - PADDING  - html.width())) + 1,
-        				top: Math.floor(Math.random() * (winHeight - PADDING - 120  - html.height())) + 100
-        			}).fadeIn(300).delay(300);
+                    html.css({
+                        backgroundColor: colList[colX],
+                        left: Math.floor(Math.random() * (winWidth - PADDING  - html.width())) + 1,
+                        top: Math.floor(Math.random() * (winHeight - PADDING - 120  - html.height())) + 100
+                    }).fadeIn(300).delay(300);
 
-        			colX++;
-        			if (colX==10) colX = 0;
-        		}
+                    colX++;
+                    if (colX==10) colX = 0;
+                }
 
-        	}).always(function() {
-            	setWordTO();
-            	running = false;
-        	});
+            }).always(function() {
+                setWordTO();
+                running = false;
+            });
 
         }
 
@@ -432,5 +432,5 @@ function wordGame(){}
 
 
 $(document).ready(function() {
-	wordGame.init();
+    wordGame.init();
 });
