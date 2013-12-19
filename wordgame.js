@@ -34,7 +34,7 @@ function wordGame(){}
         wordlist    = {},        // Object containing all words being displayed
 
         // wordnik API key
-        api_key     = 'b9342023bee8ce1e6060402034d0b36c7ab0ec75ceb051e4a',
+        api_key     = '740916580801827774344013e130d4be97817a950b357cc36',
 
         // wordnik options
         APIoptions  = {
