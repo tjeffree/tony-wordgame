@@ -7,6 +7,8 @@ function wordGame(){}
         $doc        = $(document),
         $body       = $('body'),
 
+        outputCheck = document.getElementById('output-check'),
+
         PADDING     = 20,           // padding for the bottom and right of the screen
         REFRESH     = 5 * 1000, // refresh interval to get new words
 
@@ -148,7 +150,25 @@ function wordGame(){}
             $('#f-score').html('Score: ' + score);
             $('#f-time').html(diff.toFixed() + ' sec');
             $('#f-wpm').html($wpm.html());
-            $('#f-errors').html(errors + ' error' + ( errors>1 ? 's': ''));
+            if (errors > 0) {
+                $('#f-errors').html(errors + ' error' + ( errors>1 ? 's': ''));
+            } else {
+                $('#f-errors').html('No errors');
+            }
+
+            $('#tweetBtn iframe').remove();
+            var tweetLink = document.createElement('a');
+            tweetLink.className = 'twitter-share-button';
+            tweetLink.href = 'https://twitter.com/share';
+            tweetLink.setAttribute('data-url', 'http://shex.co.uk/wordgame/');
+            tweetLink.setAttribute('data-count', 'none');
+            tweetLink.setAttribute('data-size', 'large');
+            tweetLink.setAttribute('data-text', 'I scored ' + score + ' words in ' + diff.toFixed() + ' seconds on this Word Game. Give it a try!');
+
+            document.getElementById('tweetBtn').innerHTML = '';
+            document.getElementById('tweetBtn').appendChild(tweetLink);
+
+            twttr.widgets.load();
 
             $finish.css({
                 top: yPos,
@@ -339,6 +359,13 @@ function wordGame(){}
             $('#loadit').click(function() {
                 getWords();
             });
+
+            window.onresize = function() {
+                count = 0;
+                $words.empty();
+                wordlist = {};
+                getTO = setTimeout(function(){getWords();}, 300);
+            };
         }
 
         function removeWord(obj, id) {
@@ -420,48 +447,82 @@ function wordGame(){}
                 }
             ).done(function(data) {
 
-                var winHeight   = $doc.height(),
-                    winWidth    = $doc.width(),
-                    ts          = Date.now() / 1000,
-                    htmlBank    = [],
-                    html;
-
-                for (var x=0; x<data.length; x++) {
-
-                    if (count>=10) break;
-
-                    // increment the current word count
-                    count++;
-
-                    // add the word to the list
-                    wordlist[data[x].id] = {
-                        id  : data[x].id,
-                        word: data[x].word.toLowerCase(),
-                        ts  : ts
-                    };
-
-                    html = $('<li id="w' + data[x].id + '" data-id="' + data[x].id + '" style="display:none;">' + wordlist[data[x].id].word + '</li>');
-
-                    html.css({
-                        backgroundColor: colList[colX],
-                        left: Math.floor(Math.random() * (winWidth - PADDING  - html.width())) + 1,
-                        top : Math.floor(Math.random() * (winHeight - PADDING - 220  - html.height())) + 100
-                    }).fadeIn(300).delay(300);
-                    
-                    htmlBank.push(html);
-
-                    colX++;
-                    if (colX==10) colX = 0;
-                }
-                
-                // Add them in one big DOM append
-                $words.append(htmlBank);
+                processWords(data);
 
             }).always(function() {
                 setWordTO();
                 running = false;
+
+                setTimeout(function() {
+                    $('.word').addClass('active');
+                }, 10);
+
             });
 
+        }
+
+        function processWords(data) {
+            var winHeight   = $doc.height() - 115,
+                winWidth    = $doc.width(),
+                ts          = Date.now() / 1000,
+                htmlBank    = [],
+                html, thisWord,
+                xpos, ypos, bounds,
+                heightMax, widthMax;
+
+            for (var x=0; x<data.length; x++) {
+
+                if (count>=10) break;
+
+                // increment the current word count
+                count++;
+
+                if (!(/^[a-z]+$/i.test(data[x].word))) {
+                    continue;
+                }
+
+                // add the word to the list
+                wordlist[data[x].id] = {
+                    id  : data[x].id,
+                    word: data[x].word.toLowerCase(),
+                    ts  : ts
+                };
+
+                html     = document.createElement('li');
+                html.id = 'w' + data[x].id;
+                html.setAttribute('data-id', data[x].id);
+
+                thisWord = document.createElement('div');
+                thisWord.className = 'word';
+                thisWord.innerHTML = wordlist[data[x].id].word;
+                thisWord.setAttribute('style', 'background-color: ' + colList[colX]);
+
+                html.appendChild(thisWord);
+
+                // Check width and make sure it's not off the screen
+                outputCheck.appendChild(html);
+                bounds = thisWord.getBoundingClientRect();
+                outputCheck.removeChild(html);
+
+                widthMax = winWidth - bounds.width;
+                heightMax = winHeight - bounds.height;
+                
+                xpos = (Math.random() * widthMax).toFixed();
+                ypos = (Math.random() * heightMax + 110).toFixed();
+
+                html.setAttribute('style',
+                    'left: ' + xpos + 'px; ' +
+                    'top : ' + ypos + 'px'
+                );
+
+                htmlBank.push(html);
+
+                colX++;
+                if (colX==10) colX = 0;
+            }
+
+            // Add them in one big DOM append
+            $words.append(htmlBank);
         }
 
 }).apply(wordGame);
